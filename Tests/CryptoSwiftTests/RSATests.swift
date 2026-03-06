@@ -211,10 +211,10 @@ final class RSATests: XCTestCase {
     let rsa = try RSA(rawRepresentation: privateDERData)
 
     let expectedMessage = "RSA Keys"
-    let messageToDecrypt = Data(base64Encoded: fixture.messages[expectedMessage]!.encryptedMessage["algid:encrypt:RSA:PKCS1"]!)!.bytes
+    let messageToDecrypt = Data(base64Encoded: fixture.messages[expectedMessage]!.encryptedMessage["algid:encrypt:RSA:PKCS1"]!)!.bytes as Array<UInt8>
 
     // Decrypt the data
-    let decrypted = BigUInteger(Data(messageToDecrypt)).power(rsa.d!, modulus: rsa.n).serialize().bytes
+    let decrypted = BigUInteger(Data(messageToDecrypt)).power(rsa.d!, modulus: rsa.n).serialize().bytes as Array<UInt8>
 
     let unpadded = Padding.eme_pkcs1v15.remove(from: [0x00] + decrypted, blockSize: rsa.keySize)
 
@@ -231,7 +231,7 @@ final class RSATests: XCTestCase {
       let rsa = try RSA(keySize: 1024)
 
       for _ in 0..<5 {
-        let message = BigUInteger.randomInteger(withMaximumWidth: 256).serialize().bytes
+        let message = BigUInteger.randomInteger(withMaximumWidth: 256).serialize().bytes as Array<UInt8>
 
         let decrypted = try rsa.decrypt(rsa.encrypt(message, variant: .pksc1v15), variant: .pksc1v15)
         XCTAssertEqual(decrypted, message, "encrypt+decrypt failed")
@@ -251,7 +251,7 @@ final class RSATests: XCTestCase {
       let rsa = try RSA(keySize: 1024)
 
       for _ in 0..<5 {
-        let message = BigUInteger.randomInteger(withMaximumWidth: 256).serialize().bytes
+        let message = BigUInteger.randomInteger(withMaximumWidth: 256).serialize().bytes as Array<UInt8>
 
         let signature = try rsa.sign(message, variant: .message_pkcs1v15_SHA256)
         XCTAssertTrue(try rsa.verify(signature: signature, for: message, variant: .message_pkcs1v15_SHA256), "Failed to Verify Signature for `\(message)`")
@@ -308,7 +308,7 @@ final class RSATests: XCTestCase {
     let padded = EMSAPKCS1v15Padding().add(to: t, blockSize: rsa.keySizeBytes)
 
     // Sign the data
-    let signedData = BigUInteger(Data(padded)).power(rsa.d!, modulus: rsa.n).serialize().bytes
+    let signedData = BigUInteger(Data(padded)).power(rsa.d!, modulus: rsa.n).serialize().bytes as Array<UInt8>
 
     // Ensure the signed data matches that of our test fixture
     XCTAssertEqual(signedData.toBase64(), fixture.messages[message]!.signedMessage["algid:sign:RSA:message-PKCS1v15:SHA256"], "Failed to correctly sign the data")
@@ -331,7 +331,7 @@ final class RSATests: XCTestCase {
     // Import RSA Key
     let rsa = try RSA(rawRepresentation: privateDERData)
 
-    let message = Data("This is a long message that if not hashed, will be tool large to safely sign / encrypt, therefore it should throw an error instead of resulting in a signature".utf8).bytes
+    let message = Data("This is a long message that if not hashed, will be tool large to safely sign / encrypt, therefore it should throw an error instead of resulting in a signature".utf8).bytes as Array<UInt8>
 
     // The unhashed message is too long to sign, we expect an error to be thrown...
     XCTAssertThrowsError(try rsa.sign(message, variant: .digest_pkcs1v15_SHA1))
