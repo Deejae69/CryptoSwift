@@ -28,8 +28,8 @@ extension CS {
   /// CS.BigInt(255).abs.isPrime()   // Returns false
   /// ```
   ///
-  public struct BigInt: SignedInteger {
-      public enum Sign {
+  public struct BigInt: SignedInteger, Sendable {
+      public enum Sign: Sendable {
           case plus
           case minus
       }
